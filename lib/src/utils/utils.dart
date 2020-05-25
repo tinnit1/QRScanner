@@ -1,7 +1,8 @@
 import 'package:qrreaderapp/src/providers/db_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
 
-Future<void> launchInBrowser(ScanModel scan) async {
+Future<void> launchInBrowser(BuildContext context ,ScanModel scan) async {
   if (scan.tipo == 'http') {
     if (await canLaunch(scan.valor)) {
       await launch(
@@ -13,6 +14,6 @@ Future<void> launchInBrowser(ScanModel scan) async {
       throw 'Could not launch $scan.valor';
     }
   } else {
-    print('geo..');
+    Navigator.pushNamed(context, 'mapa', arguments: scan);
   }
 }

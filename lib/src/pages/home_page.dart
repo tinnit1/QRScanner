@@ -1,4 +1,6 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:qrreaderapp/src/bloc/scans_bloc.dart';
 import 'package:qrreaderapp/src/models/scan_model.dart';
 import 'package:qrreaderapp/src/pages/direcciones_page.dart';
@@ -26,44 +28,38 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: _crearBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: _scanQr,
+        onPressed: () => _scanQr(context),
         child: Icon(Icons.filter_center_focus),
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }
 
-  Future _scanQr() async {
-    // https://stackoverflow.com/questions/46284022/ios-provisioning-profile-expiring-after-6-days
-    // geo:5.572536692719274,-73.33600058993228
-    String result = 'https://stackoverflow.com/questions/46284022/ios-provisioning-profile-expiring-after-6-days';
-    // ScanResult result;
-    // try {
-    //   result = await BarcodeScanner.scan();
+  Future _scanQr(BuildContext context) async {
+    ScanResult result;
+    try {
+      result = await BarcodeScanner.scan();
 
-    // } on PlatformException catch (e) {
-    //    result = ScanResult(
-    //     type: ResultType.Error,
-    //     format: BarcodeFormat.unknown,
-    //   );
+    } on PlatformException catch (e) {
+       result = ScanResult(
+        type: ResultType.Error,
+        format: BarcodeFormat.unknown,
+      );
 
-    //   if (e.code == BarcodeScanner.cameraAccessDenied) {
-    //     setState(() {
-    //       result.rawContent = 'The user did not grant the camera permission!';
-    //     });
-    //   } else {
-    //     result.rawContent = 'Unknown error: $e';
-    //   }
-    // }
-    // print('Future string: ${result.rawContent}');
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        setState(() {
+          result.rawContent = 'The user did not grant the camera permission!';
+        });
+      } else {
+        result.rawContent = 'Unknown error: $e';
+      }
+    }
+    print('Future string: ${result.rawContent}');
     if (result != null) {
-      final scan = ScanModel(valor: result);
+      final scan = ScanModel(valor: result.rawContent);
       scansBloc.addScan(scan);
 
-      final scan2 = ScanModel(valor: 'geo:5.572536692719274,-73.33600058993228');
-      scansBloc.addScan(scan2);
-
-      await utils.launchInBrowser(scan);
+      await utils.launchInBrowser(context ,scan);
     }
   }
 
